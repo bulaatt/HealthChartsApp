@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9EC8461A2D29B342003D8E5D /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 9EC846192D29B342003D8E5D /* Algorithms */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		9EC845842D25CC8C003D8E5D /* HealthCharts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthCharts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9EC8461A2D29B342003D8E5D /* Algorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = HealthCharts;
 			packageProductDependencies = (
+				9EC846192D29B342003D8E5D /* Algorithms */,
 			);
 			productName = HealthCharts;
 			productReference = 9EC845842D25CC8C003D8E5D /* HealthCharts.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = 9EC8457B2D25CC8C003D8E5D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9EC846182D29B342003D8E5D /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9EC845852D25CC8C003D8E5D /* Products */;
 			projectDirPath = "";
@@ -345,6 +354,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9EC846182D29B342003D8E5D /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9EC846192D29B342003D8E5D /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9EC846182D29B342003D8E5D /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9EC8457C2D25CC8C003D8E5D /* Project object */;
 }
