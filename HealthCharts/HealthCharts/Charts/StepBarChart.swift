@@ -101,7 +101,7 @@ struct StepBarChart: View {
                 .font(.footnote.bold())
                 .foregroundStyle(.secondary)
             
-            Text(selectedHealthMetricDate?.value ?? 0, format: .number)
+            Text(selectedHealthMetricDate?.value ?? 0, format: .number.precision(.fractionLength(0)))
                 .fontWeight(.heavy)
                 .foregroundStyle(.mint)
         }

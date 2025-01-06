@@ -50,7 +50,7 @@ struct StepPieChart: View {
                     .opacity(isWeekdaySelected ? 1.0 : 0.3)
                 }
             }
-            .frame(height: 240)
+            .frame(height: 220)
             .chartAngleSelection(value: $rawSelectedChartValue.animation(.easeInOut))
             .onChange(of: rawSelectedChartValue) {
                 if let rawSelectedChartValue {

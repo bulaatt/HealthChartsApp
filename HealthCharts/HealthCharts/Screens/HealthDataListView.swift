@@ -8,18 +8,24 @@
 import SwiftUI
 
 struct HealthDataListView: View {
+    
+    @Environment(HealthKitManager.self) private var healthKitManager
     @State private var isShowingAddDataSheet: Bool = false
     @State private var addDataDate: Date = .now
     @State private var valueToAdd: String = ""
     
     var healthMetric: HealthMetricContext
     
+    var listData: [HealthMetric] {
+        healthMetric == .steps ? healthKitManager.stepData : healthKitManager.calorieData
+    }
+    
     var body: some View {
-        List(0..<28) { i in
+        List(listData.reversed()) { data in
             HStack {
-                Text(Date(), format: .dateTime.month(.abbreviated).day(.twoDigits).year())
+                Text(data.date, format: .dateTime.month(.abbreviated).day(.twoDigits).year())
                 Spacer()
-                Text(162.678, format: .number.precision(.fractionLength(healthMetric == .steps ? 0 : 2)))
+                Text(data.value, format: .number.precision(.fractionLength(healthMetric == .steps ? 0 : 1)))
             }
         }
         .navigationTitle(healthMetric.title)
@@ -68,5 +74,6 @@ struct HealthDataListView: View {
 #Preview {
     NavigationStack {
         HealthDataListView(healthMetric: .calories)
+            .environment(HealthKitManager())
     }
 }

@@ -1,5 +1,5 @@
 //
-//  CalorieLineChart.swift
+//  CalorieBarChart.swift
 //  HealthCharts
 //
 //  Created by Булат Камалетдинов on 06.01.2025.
@@ -8,20 +8,14 @@
 import SwiftUI
 import Charts
 
-struct CalorieLineChart: View {
+struct CalorieBarChart: View {
     
     @State private var rawSelectedDate: Date?
     
     var selectedHealthMetric: HealthMetricContext
-    var chartData: [HealthMetric]
+    var chartData: [WeekdayChartData]
     
-    var avgCaloriesBurned: Double {
-        guard !chartData.isEmpty else { return 0 }
-        let totalCalories = chartData.reduce(0) { $0 + $1.value }
-        return totalCalories / Double(chartData.count)
-    }
-    
-    var selectedHealthMetricDate: HealthMetric? {
+    var selectedHealthMetricDate: WeekdayChartData? {
         guard let rawSelectedDate else { return nil }
         return chartData.first {
             Calendar.current.isDate(rawSelectedDate, inSameDayAs: $0.date)
@@ -34,22 +28,17 @@ struct CalorieLineChart: View {
     
     var body: some View {
         VStack {
-            NavigationLink(value: selectedHealthMetric) {
-                HStack {
-                    VStack(alignment: .leading) {
-                        Label("Active Energy", systemImage: "figure.run")
-                            .font(.title3.bold())
-                            .foregroundStyle(.orange)
-                        
-                        Text("Avg: \(avgCaloriesBurned, specifier: "%.1f") kcal")
-                            .font(.caption)
-                    }
+            HStack {
+                VStack(alignment: .leading) {
+                    Label("Averages", systemImage: "figure")
+                        .font(.title3.bold())
+                        .foregroundStyle(.orange)
                     
-                    Spacer()
-                    
-                    Image(systemName: "chevron.right.circle")
-                        .imageScale(.large)
+                    Text("Per Weekday (Last 28 Days)")
+                        .font(.caption)
                 }
+                
+                Spacer()
             }
             .foregroundStyle(.secondary)
             .padding(.bottom, 12)
@@ -64,35 +53,21 @@ struct CalorieLineChart: View {
                                     overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) { annotationView }
                 }
                 
-                RuleMark(y: .value("Average", avgCaloriesBurned))
-                    .foregroundStyle(.gray)
-                    .lineStyle(.init(lineWidth: 1, dash: [5]))
-                
-                
                 ForEach(chartData) { calorie in
-                    AreaMark(
-                        x: .value("Day", calorie.date, unit: .day),
-                        yStart: .value("Value", calorie.value),
-                        yEnd: .value("Min Value", minValue)
+                    BarMark(
+                        x: .value("Date", calorie.date, unit: .day),
+                        y: .value("Steps", calorie.value)
                     )
-                    .foregroundStyle(Gradient(colors: [.orange.opacity(0.5), .clear]))
-                    .interpolationMethod(.catmullRom)
-                    
-                    LineMark(
-                        x: .value("Day", calorie.date, unit: .day),
-                        y: .value("Value", calorie.value)
-                    )
-                    .foregroundStyle(.orange.gradient)
-                    .interpolationMethod(.catmullRom)
-                    .symbol(.circle)
+                    .foregroundStyle(Color.orange.gradient)
+                    .opacity(rawSelectedDate == nil || calorie.date == selectedHealthMetricDate?.date ? 1 : 0.3)
                 }
             }
-            .frame(height: 150)
+            .frame(height: 220)
             .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
             .chartYScale(domain: .automatic(includesZero: false))
             .chartXAxis {
-                AxisMarks(preset: .aligned) {
-                    AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
+                AxisMarks(values: .stride(by: .day)) {
+                    AxisValueLabel(format: .dateTime.weekday(), centered: true)
                 }
             }
             .chartYAxis {
@@ -107,7 +82,8 @@ struct CalorieLineChart: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground)))
+                .fill(Color(.secondarySystemBackground))
+        )
     }
     
     var annotationView: some View {
@@ -130,5 +106,6 @@ struct CalorieLineChart: View {
 }
 
 #Preview {
-    CalorieLineChart(selectedHealthMetric: .calories, chartData: FakeData.calories)
+    CalorieBarChart(selectedHealthMetric: .calories,
+                    chartData: ChartMath.averageWeekdayCount(for: FakeData.calories))
 }

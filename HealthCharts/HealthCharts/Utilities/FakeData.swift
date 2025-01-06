@@ -31,4 +31,16 @@ struct FakeData {
         
         return array
     }
+    
+    static var calorieAverages: [WeekdayChartData] {
+        var array: [WeekdayChartData] = []
+        
+        for i in 0..<7 {
+            let healthMetric = WeekdayChartData(date: Calendar.current.date(byAdding: .day, value: -i, to: .now)!,
+                                                value: Double.random(in: 100...200))
+            array.append(healthMetric)
+        }
+        
+        return array
+    }
 }

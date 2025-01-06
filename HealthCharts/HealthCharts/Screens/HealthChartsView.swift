@@ -46,6 +46,7 @@ struct HealthChartsView: View {
                         StepPieChart(chartData: ChartMath.averageWeekdayCount(for: healthKitManager.stepData))
                     case .calories:
                         CalorieLineChart(selectedHealthMetric: selectedHealthMetric, chartData: healthKitManager.calorieData)
+                        CalorieBarChart(selectedHealthMetric: selectedHealthMetric, chartData: ChartMath.averageWeekdayCount(for: healthKitManager.calorieData))
                     }
                 }
             }
