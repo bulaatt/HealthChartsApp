@@ -14,7 +14,7 @@ import Observation
     let types: Set = [HKQuantityType(.stepCount), HKQuantityType(.activeEnergyBurned)]
     
     var stepData: [HealthMetric] = []
-    var caloriesData: [HealthMetric] = []
+    var calorieData: [HealthMetric] = []
     
     func fetchStepCount() async {
         let calendar = Calendar.current
@@ -52,8 +52,8 @@ import Observation
                                                                   intervalComponents: .init(day: 1))
         do {
             let calories = try await caloriesQuery.result(for: store)
-            caloriesData = calories.statistics().map {
-                .init(date: $0.startDate, value: $0.mostRecentQuantity()?.doubleValue(for: .kilocalorie()) ?? 0)
+            calorieData = calories.statistics().map {
+                .init(date: $0.startDate, value: $0.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0)
             }
         } catch {
             

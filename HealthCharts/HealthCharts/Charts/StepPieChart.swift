@@ -80,10 +80,12 @@ struct StepPieChart: View {
             }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.secondarySystemBackground)))
     }
 }
 
 #Preview {
-    StepPieChart(chartData: ChartMath.averageWeekdayCount(for: HealthMetric.fakeData))
+    StepPieChart(chartData: ChartMath.averageWeekdayCount(for: FakeData.steps))
 }

@@ -40,14 +40,20 @@ struct HealthChartsView: View {
                         }
                     }.pickerStyle(SegmentedPickerStyle())
                     
-                    StepBarChart(selectedHealthMetric: selectedHealthMetric, chartData: healthKitManager.stepData)
-                    StepPieChart(chartData: ChartMath.averageWeekdayCount(for: healthKitManager.stepData))
+                    switch selectedHealthMetric {
+                    case .steps:
+                        StepBarChart(selectedHealthMetric: selectedHealthMetric, chartData: healthKitManager.stepData)
+                        StepPieChart(chartData: ChartMath.averageWeekdayCount(for: healthKitManager.stepData))
+                    case .calories:
+                        CalorieLineChart(selectedHealthMetric: selectedHealthMetric, chartData: healthKitManager.calorieData)
+                    }
                 }
             }
             .padding()
             .scrollIndicators(.hidden)
             .task {
                 await healthKitManager.fetchStepCount()
+                await healthKitManager.fetchCalories()
                 isShowingPermissionPrimingSheet = !hasSeenPermissionPriming
             }
             .navigationTitle("Health Charts")

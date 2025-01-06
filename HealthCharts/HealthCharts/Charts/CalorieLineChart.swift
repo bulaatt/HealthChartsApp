@@ -1,25 +1,19 @@
 //
-//  StepBarChart.swift
+//  CalorieLineChart.swift
 //  HealthCharts
 //
-//  Created by Булат Камалетдинов on 04.01.2025.
+//  Created by Булат Камалетдинов on 06.01.2025.
 //
 
 import SwiftUI
 import Charts
 
-struct StepBarChart: View {
+struct CalorieLineChart: View {
     
     @State private var rawSelectedDate: Date?
     
     var selectedHealthMetric: HealthMetricContext
     var chartData: [HealthMetric]
-    
-    var avgStepCount: Double {
-        guard !chartData.isEmpty else { return 0 }
-        let totalSteps = chartData.reduce(0) { $0 + $1.value }
-        return totalSteps / Double(chartData.count)
-    }
     
     var selectedHealthMetricDate: HealthMetric? {
         guard let rawSelectedDate else { return nil }
@@ -28,16 +22,20 @@ struct StepBarChart: View {
         }
     }
     
+    var minValue: Double {
+        chartData.map { $0.value }.min() ?? 0
+    }
+    
     var body: some View {
         VStack {
             NavigationLink(value: selectedHealthMetric) {
                 HStack {
                     VStack(alignment: .leading) {
-                        Label("Steps", systemImage: "figure.hiking")
+                        Label("Active Energy", systemImage: "figure.run")
                             .font(.title3.bold())
-                            .foregroundStyle(.mint)
+                            .foregroundStyle(.orange)
                         
-                        Text("Avg: \(Int(avgStepCount)) steps")
+                        Text("Avg: 126 kcal")
                             .font(.caption)
                     }
                     
@@ -60,21 +58,32 @@ struct StepBarChart: View {
                                     overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) { annotationView }
                 }
                 
-                RuleMark(y: .value("Average", avgStepCount))
-                    .foregroundStyle(Color.secondary)
+                RuleMark(y: .value("Average", 125))
+                    .foregroundStyle(.gray)
                     .lineStyle(.init(lineWidth: 1, dash: [5]))
                 
-                ForEach(chartData) { steps in
-                    BarMark(
-                        x: .value("Date", steps.date, unit: .day),
-                        y: .value("Steps", steps.value)
+                
+                ForEach(chartData) { calorie in
+                    AreaMark(
+                        x: .value("Day", calorie.date, unit: .day),
+                        yStart: .value("Value", calorie.value),
+                        yEnd: .value("Min Value", minValue)
                     )
-                    .foregroundStyle(Color.mint.gradient)
-                    .opacity(rawSelectedDate == nil || steps.date == selectedHealthMetricDate?.date ? 1 : 0.3)
+                    .foregroundStyle(Gradient(colors: [.orange.opacity(0.5), .clear]))
+                    .interpolationMethod(.catmullRom)
+                    
+                    LineMark(
+                        x: .value("Day", calorie.date, unit: .day),
+                        y: .value("Value", calorie.value)
+                    )
+                    .foregroundStyle(.orange.gradient)
+                    .interpolationMethod(.catmullRom)
+                    .symbol(.circle)
                 }
             }
             .frame(height: 150)
             .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
+            .chartYScale(domain: .automatic(includesZero: false))
             .chartXAxis {
                 AxisMarks(preset: .aligned) {
                     AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
@@ -85,14 +94,12 @@ struct StepBarChart: View {
                     AxisGridLine()
                         .foregroundStyle(Color.secondary.opacity (0.3))
                     
-                    AxisValueLabel((value.as(Double.self) ?? 0).formatted(.number.notation(.compactName)))
+                    AxisValueLabel()
                 }
             }
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground)))
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
     }
     
     var annotationView: some View {
@@ -101,9 +108,9 @@ struct StepBarChart: View {
                 .font(.footnote.bold())
                 .foregroundStyle(.secondary)
             
-            Text(selectedHealthMetricDate?.value ?? 0, format: .number)
+            Text(selectedHealthMetricDate?.value ?? 0, format: .number.precision(.fractionLength(1)))
                 .fontWeight(.heavy)
-                .foregroundStyle(.mint)
+                .foregroundStyle(.orange)
         }
         .padding(12)
         .background(
@@ -115,5 +122,5 @@ struct StepBarChart: View {
 }
 
 #Preview {
-    StepBarChart(selectedHealthMetric: .steps, chartData: FakeData.steps)
+    CalorieLineChart(selectedHealthMetric: .calories, chartData: FakeData.calories)
 }
