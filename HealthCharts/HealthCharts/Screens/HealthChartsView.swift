@@ -41,24 +41,7 @@ struct HealthChartsView: View {
                     }.pickerStyle(SegmentedPickerStyle())
                     
                     StepBarChart(selectedHealthMetric: selectedHealthMetric, chartData: healthKitManager.stepData)
-                    
-                    VStack(alignment: .leading) {
-                        VStack(alignment: .leading) {
-                            Label("Averages", systemImage: "calendar")
-                                .font(.title3.bold())
-                                .foregroundStyle(.mint)
-                            Text("Last 28 Days")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.bottom, 12)
-                        
-                        RoundedRectangle(cornerRadius: 12)
-                            .foregroundStyle(.secondary)
-                            .frame(height: 260)
-                    }
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
+                    StepPieChart(chartData: ChartMath.averageWeekdayCount(for: healthKitManager.stepData))
                 }
             }
             .padding()
