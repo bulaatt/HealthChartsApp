@@ -59,4 +59,22 @@ import Observation
             
         }
     }
+    
+    func addStepData(for date: Date, value: Double) async {
+        let stepQuantity = HKQuantity(unit: .count(), doubleValue: value)
+        let stepSample = HKQuantitySample(type: HKQuantityType(.stepCount),
+                                          quantity: stepQuantity,
+                                          start: date,
+                                          end: date)
+        try! await store.save(stepSample)
+    }
+    
+    func addCalorieData(for date: Date, value: Double) async {
+        let calorieQuantity = HKQuantity(unit: .kilocalorie(), doubleValue: value)
+        let calorieSample = HKQuantitySample(type: HKQuantityType(.activeEnergyBurned),
+                                             quantity: calorieQuantity,
+                                             start: date,
+                                             end: date)
+        try! await store.save(calorieSample)
+    }
 }

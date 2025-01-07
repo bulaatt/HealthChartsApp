@@ -57,7 +57,16 @@ struct HealthDataListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
-                        // soon will be done 🧃
+                        Task {
+                            if healthMetric == .steps {
+                                await healthKitManager.addStepData(for: addDataDate, value: Double(valueToAdd)!)
+                                await healthKitManager.fetchStepCount()
+                            } else {
+                                await healthKitManager.addCalorieData(for: addDataDate, value: Double(valueToAdd)!)
+                                await healthKitManager.fetchCalories()
+                            }
+                            isShowingAddDataSheet = false
+                        }
                     }
                 }
                 
