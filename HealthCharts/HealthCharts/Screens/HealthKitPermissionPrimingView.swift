@@ -14,7 +14,6 @@ struct HealthKitPermissionPrimingView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isShowingHealthPermissions: Bool = false
     @State private var errorMessage: String? = nil
-    @Binding var hasSeen: Bool
     
     var description = """
     This app displays your step and calorie data in interactive charts.
@@ -45,7 +44,11 @@ struct HealthKitPermissionPrimingView: View {
         }
         .padding(30)
         .interactiveDismissDisabled()
-        .onAppear { hasSeen = true }
+        .alert("HealthKit Access Error", isPresented: .constant(errorMessage != nil), actions: {
+            Button("OK", role: .cancel) { errorMessage = nil }
+        }, message: {
+            Text(errorMessage ?? "An unexpected error occurred.")
+        })
         .alert("HealthKit Access Error", isPresented: .constant(errorMessage != nil), actions: {
             Button("OK", role: .cancel) { errorMessage = nil }
         }, message: {
@@ -67,6 +70,6 @@ struct HealthKitPermissionPrimingView: View {
 }
 
 #Preview {
-    HealthKitPermissionPrimingView(hasSeen: .constant(true))
+    HealthKitPermissionPrimingView()
         .environment(HealthKitManager())
 }

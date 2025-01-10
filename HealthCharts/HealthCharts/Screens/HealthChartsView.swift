@@ -25,9 +25,10 @@ enum HealthMetricContext: CaseIterable, Identifiable {
 struct HealthChartsView: View {
     
     @Environment(HealthKitManager.self) private var healthKitManager
-    @AppStorage("hasSeenPermissionPriming") private var hasSeenPermissionPriming: Bool = false
     @State private var isShowingPermissionPrimingSheet: Bool = false
     @State private var selectedHealthMetric: HealthMetricContext = .steps
+    @State private var isShowingAlert: Bool = false
+    @State private var fetchError: HCError = .noData
     var isSteps: Bool { selectedHealthMetric == .steps }
     
     var body: some View {
@@ -53,21 +54,49 @@ struct HealthChartsView: View {
             .padding()
             .scrollIndicators(.hidden)
             .task {
-                await healthKitManager.fetchStepCount()
-                await healthKitManager.fetchCalories()
-                isShowingPermissionPrimingSheet = !hasSeenPermissionPriming
+                await fetchHealthData()
             }
             .navigationTitle("Health Charts")
             .navigationDestination(for: HealthMetricContext.self) { healthMetric in
                 HealthDataListView(healthMetric: healthMetric)
             }
-            .sheet(isPresented: $isShowingPermissionPrimingSheet) {
-                // fetch health data
-            } content: {
-                HealthKitPermissionPrimingView(hasSeen: $hasSeenPermissionPriming)
+            .sheet(isPresented: $isShowingPermissionPrimingSheet, onDismiss: {
+                Task {
+                    await fetchHealthData()
+                }
+            }, content: {
+                HealthKitPermissionPrimingView()
+            })
+            .alert(isPresented: $isShowingAlert, error: fetchError) { fetchError in
+                switch fetchError {
+                case .authNotDetermined, .noData, .unableToCompleteRequest:
+                    EmptyView()
+                case .sharingDenied(_):
+                    Button("Settings") {
+                        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+                    }
+                    Button("Cancel", role: .cancel) { }
+                }
+            } message: { fetchError in
+                Text(fetchError.failureReason)
             }
         }
         .tint(isSteps ? .mint : .orange)
+    }
+    
+    private func fetchHealthData() async {
+        do {
+            try await healthKitManager.fetchStepCount()
+            try await healthKitManager.fetchCalories()
+        } catch HCError.authNotDetermined {
+            isShowingPermissionPrimingSheet = true
+        } catch HCError.noData {
+            fetchError = .noData
+            isShowingAlert = true
+        } catch {
+            fetchError = .unableToCompleteRequest
+            isShowingAlert = true
+        }
     }
 }
 

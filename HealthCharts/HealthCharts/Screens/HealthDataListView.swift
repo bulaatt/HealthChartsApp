@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import HealthKit
 
 struct HealthDataListView: View {
     
     @Environment(HealthKitManager.self) private var healthKitManager
     @State private var isShowingAddDataSheet: Bool = false
+    @State private var isShowingAlert: Bool = false
+    @State private var writeError: HCError = .noData
     @State private var addDataDate: Date = .now
     @State private var valueToAdd: String = ""
     
@@ -54,18 +57,32 @@ struct HealthDataListView: View {
             }
             .navigationTitle(healthMetric.title)
             .toolbarTitleDisplayMode(.inline)
+            .alert(isPresented: $isShowingAlert, error: writeError) { writeError in
+                switch writeError {
+                case .authNotDetermined, .noData, .unableToCompleteRequest:
+                    EmptyView()
+                case .sharingDenied(_):
+                    Button("Settings") {
+                        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+                    }
+                    Button("Cancel", role: .cancel) { }
+                }
+            } message: { writeError in
+                Text(writeError.failureReason)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
                         Task {
-                            if healthMetric == .steps {
-                                await healthKitManager.addStepData(for: addDataDate, value: Double(valueToAdd)!)
-                                await healthKitManager.fetchStepCount()
-                            } else {
-                                await healthKitManager.addCalorieData(for: addDataDate, value: Double(valueToAdd)!)
-                                await healthKitManager.fetchCalories()
+                            do {
+                                try await addHealthData(for: addDataDate, value: Double(valueToAdd)!)
+                                isShowingAlert = false
+                                isShowingAddDataSheet = false
+                            } catch let error as HCError {
+                                handleError(error)
+                            } catch {
+                                handleError(nil)
                             }
-                            isShowingAddDataSheet = false
                         }
                     }
                 }
@@ -77,6 +94,27 @@ struct HealthDataListView: View {
                 }
             }
         }
+    }
+    
+    private func addHealthData(for date: Date, value: Double) async throws {
+        switch healthMetric {
+        case .steps:
+            try await healthKitManager.addHealthMetricData(for: date, value: value, type: HKQuantityType(.stepCount))
+            try await healthKitManager.fetchStepCount()
+        default:
+            try await healthKitManager.addHealthMetricData(for: date, value: value, type: HKQuantityType(.activeEnergyBurned))
+            try await healthKitManager.fetchCalories()
+        }
+    }
+    
+    private func handleError(_ error: HCError?) {
+        if let error = error, case .sharingDenied(let quantityType) = error {
+            writeError = .sharingDenied(quantityType: quantityType)
+        } else {
+            writeError = .unableToCompleteRequest
+        }
+        isShowingAlert = true
+        isShowingAddDataSheet = true
     }
 }
 
