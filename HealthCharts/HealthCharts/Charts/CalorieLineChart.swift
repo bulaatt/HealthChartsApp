@@ -54,53 +54,60 @@ struct CalorieLineChart: View {
             .foregroundStyle(.secondary)
             .padding(.bottom, 12)
             
-            Chart {
-                if let selectedHealthMetricDate {
-                    RuleMark(x: .value("Selected Metric", selectedHealthMetricDate.date, unit: .day))
-                        .foregroundStyle(Color.secondary.opacity(0.3))
-                        .offset(y: -10)
-                        .annotation(position: .top,
-                                    spacing: 0,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) { annotationView }
-                }
-                
-                RuleMark(y: .value("Average", avgCaloriesBurned))
-                    .foregroundStyle(.gray)
-                    .lineStyle(.init(lineWidth: 1, dash: [5]))
-                
-                
-                ForEach(chartData) { calorie in
-                    AreaMark(
-                        x: .value("Day", calorie.date, unit: .day),
-                        yStart: .value("Value", calorie.value),
-                        yEnd: .value("Min Value", minValue)
-                    )
-                    .foregroundStyle(Gradient(colors: [.orange.opacity(0.5), .clear]))
-                    .interpolationMethod(.catmullRom)
+            if chartData.isEmpty {
+                ContentUnavailableView(
+                    "No Data",
+                    systemImage: "chart.xyaxis.line",
+                    description: Text("There is no calorie data from the Health App")
+                )
+            } else {
+                Chart {
+                    if let selectedHealthMetricDate {
+                        RuleMark(x: .value("Selected Metric", selectedHealthMetricDate.date, unit: .day))
+                            .foregroundStyle(Color.secondary.opacity(0.3))
+                            .offset(y: -10)
+                            .annotation(position: .top,
+                                        spacing: 0,
+                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) { annotationView }
+                    }
                     
-                    LineMark(
-                        x: .value("Day", calorie.date, unit: .day),
-                        y: .value("Value", calorie.value)
-                    )
-                    .foregroundStyle(.orange.gradient)
-                    .interpolationMethod(.catmullRom)
-                    .symbol(.circle)
-                }
-            }
-            .frame(height: 150)
-            .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
-            .chartYScale(domain: .automatic(includesZero: false))
-            .chartXAxis {
-                AxisMarks(preset: .aligned) {
-                    AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
-                }
-            }
-            .chartYAxis {
-                AxisMarks { value in
-                    AxisGridLine()
-                        .foregroundStyle(Color.secondary.opacity (0.3))
+                    RuleMark(y: .value("Average", avgCaloriesBurned))
+                        .foregroundStyle(.cyan)
+                        .lineStyle(.init(lineWidth: 1, dash: [5]))
                     
-                    AxisValueLabel()
+                    ForEach(chartData) { calorie in
+                        AreaMark(
+                            x: .value("Day", calorie.date, unit: .day),
+                            yStart: .value("Value", calorie.value),
+                            yEnd: .value("Min Value", minValue)
+                        )
+                        .foregroundStyle(Gradient(colors: [.orange.opacity(0.5), .clear]))
+                        .interpolationMethod(.catmullRom)
+                        
+                        LineMark(
+                            x: .value("Day", calorie.date, unit: .day),
+                            y: .value("Value", calorie.value)
+                        )
+                        .foregroundStyle(.orange.gradient)
+                        .interpolationMethod(.catmullRom)
+                        .symbol(.circle)
+                    }
+                }
+                .frame(height: 150)
+                .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
+                .chartYScale(domain: .automatic(includesZero: false))
+                .chartXAxis {
+                    AxisMarks(preset: .aligned) {
+                        AxisValueLabel(format: .dateTime.month(.defaultDigits).day())
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks { value in
+                        AxisGridLine()
+                            .foregroundStyle(Color.secondary.opacity (0.3))
+                        
+                        AxisValueLabel()
+                    }
                 }
             }
         }

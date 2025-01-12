@@ -59,7 +59,7 @@ struct HealthDataListView: View {
             .toolbarTitleDisplayMode(.inline)
             .alert(isPresented: $isShowingAlert, error: writeError) { writeError in
                 switch writeError {
-                case .authNotDetermined, .noData, .unableToCompleteRequest:
+                case .authNotDetermined, .noData, .unableToCompleteRequest, .invalidValue:
                     EmptyView()
                 case .sharingDenied(_):
                     Button("Settings") {
@@ -73,11 +73,18 @@ struct HealthDataListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Add Data") {
+                        guard let value = Double(valueToAdd) else {
+                            writeError = .invalidValue
+                            isShowingAlert = true
+                            valueToAdd = ""
+                            return
+                        }
                         Task {
                             do {
-                                try await addHealthData(for: addDataDate, value: Double(valueToAdd)!)
+                                try await addHealthData(for: addDataDate, value: value)
                                 isShowingAlert = false
                                 isShowingAddDataSheet = false
+                                valueToAdd = ""
                             } catch let error as HCError {
                                 handleError(error)
                             } catch {
@@ -90,6 +97,7 @@ struct HealthDataListView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Dismiss") {
                         isShowingAddDataSheet = false
+                        valueToAdd = ""
                     }
                 }
             }

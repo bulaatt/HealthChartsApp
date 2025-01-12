@@ -69,7 +69,7 @@ struct HealthChartsView: View {
             })
             .alert(isPresented: $isShowingAlert, error: fetchError) { fetchError in
                 switch fetchError {
-                case .authNotDetermined, .noData, .unableToCompleteRequest:
+                case .authNotDetermined, .noData, .unableToCompleteRequest, .invalidValue:
                     EmptyView()
                 case .sharingDenied(_):
                     Button("Settings") {

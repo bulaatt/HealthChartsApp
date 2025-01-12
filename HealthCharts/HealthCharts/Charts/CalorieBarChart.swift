@@ -43,39 +43,47 @@ struct CalorieBarChart: View {
             .foregroundStyle(.secondary)
             .padding(.bottom, 12)
             
-            Chart {
-                if let selectedHealthMetricDate {
-                    RuleMark(x: .value("Selected Metric", selectedHealthMetricDate.date, unit: .day))
-                        .foregroundStyle(Color.secondary.opacity(0.3))
-                        .offset(y: -10)
-                        .annotation(position: .top,
-                                    spacing: 0,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) { annotationView }
-                }
-                
-                ForEach(chartData) { calorie in
-                    BarMark(
-                        x: .value("Date", calorie.date, unit: .day),
-                        y: .value("Steps", calorie.value)
-                    )
-                    .foregroundStyle(Color.orange.gradient)
-                    .opacity(rawSelectedDate == nil || calorie.date == selectedHealthMetricDate?.date ? 1 : 0.3)
-                }
-            }
-            .frame(height: 220)
-            .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
-            .chartYScale(domain: .automatic(includesZero: false))
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .day)) {
-                    AxisValueLabel(format: .dateTime.weekday(), centered: true)
-                }
-            }
-            .chartYAxis {
-                AxisMarks { value in
-                    AxisGridLine()
-                        .foregroundStyle(Color.secondary.opacity (0.3))
+            if chartData.isEmpty {
+                ContentUnavailableView(
+                    "No Data",
+                    systemImage: "chart.bar.xaxis",
+                    description: Text("There is no calorie data from the Health App")
+                )
+            } else {
+                Chart {
+                    if let selectedHealthMetricDate {
+                        RuleMark(x: .value("Selected Metric", selectedHealthMetricDate.date, unit: .day))
+                            .foregroundStyle(Color.secondary.opacity(0.3))
+                            .offset(y: -10)
+                            .annotation(position: .top,
+                                        spacing: 0,
+                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) { annotationView }
+                    }
                     
-                    AxisValueLabel()
+                    ForEach(chartData) { calorie in
+                        BarMark(
+                            x: .value("Date", calorie.date, unit: .day),
+                            y: .value("Steps", calorie.value)
+                        )
+                        .foregroundStyle(Color.orange.gradient)
+                        .opacity(rawSelectedDate == nil || calorie.date == selectedHealthMetricDate?.date ? 1 : 0.3)
+                    }
+                }
+                .frame(height: 220)
+                .chartXSelection(value: $rawSelectedDate.animation(.easeInOut))
+                .chartYScale(domain: .automatic(includesZero: false))
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .day)) {
+                        AxisValueLabel(format: .dateTime.weekday(), centered: true)
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks { value in
+                        AxisGridLine()
+                            .foregroundStyle(Color.secondary.opacity (0.3))
+                        
+                        AxisValueLabel()
+                    }
                 }
             }
         }
