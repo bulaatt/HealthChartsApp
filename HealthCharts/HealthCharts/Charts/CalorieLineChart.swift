@@ -12,20 +12,14 @@ struct CalorieLineChart: View {
     
     @State private var rawSelectedDate: Date?
     
-    var selectedHealthMetric: HealthMetricContext
-    var chartData: [HealthMetric]
+    var chartData: [WeekdayChartData]
     
-    var avgCaloriesBurned: Double {
-        guard !chartData.isEmpty else { return 0 }
-        let totalCalories = chartData.reduce(0) { $0 + $1.value }
-        return totalCalories / Double(chartData.count)
+    var averageCalories: Int {
+        Int(chartData.map { $0.value }.average)
     }
     
-    var selectedHealthMetricDate: HealthMetric? {
-        guard let rawSelectedDate else { return nil }
-        return chartData.first {
-            Calendar.current.isDate(rawSelectedDate, inSameDayAs: $0.date)
-        }
+    var selectedData: WeekdayChartData? {
+        ChartHelper.parseSelectedData(from: chartData, in: rawSelectedDate)
     }
     
     var minValue: Double {
@@ -33,26 +27,11 @@ struct CalorieLineChart: View {
     }
     
     var body: some View {
-        VStack {
-            NavigationLink(value: selectedHealthMetric) {
-                HStack {
-                    VStack(alignment: .leading) {
-                        Label("Active Energy", systemImage: "figure.run")
-                            .font(.title3.bold())
-                            .foregroundStyle(.orange)
-                        
-                        Text("Avg: \(avgCaloriesBurned, specifier: "%.1f") kcal")
-                            .font(.caption)
-                    }
-                    
-                    Spacer()
-                    
-                    Image(systemName: "chevron.right.circle")
-                        .imageScale(.large)
-                }
-            }
-            .foregroundStyle(.secondary)
-            .padding(.bottom, 12)
+        ChartContainer(title: "Active Energy",
+                       symbol: "figure.run",
+                       subtitle: "Avg: \(averageCalories.formatted(.number.precision(.fractionLength(1)))) kcal",
+                       context: .calories,
+                       isNav: true) {
             
             if chartData.isEmpty {
                 ContentUnavailableView(
@@ -62,16 +41,11 @@ struct CalorieLineChart: View {
                 )
             } else {
                 Chart {
-                    if let selectedHealthMetricDate {
-                        RuleMark(x: .value("Selected Metric", selectedHealthMetricDate.date, unit: .day))
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                            .offset(y: -10)
-                            .annotation(position: .top,
-                                        spacing: 0,
-                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) { annotationView }
+                    if let selectedData {
+                        ChartAnnotationView(data: selectedData, context: .calories)
                     }
                     
-                    RuleMark(y: .value("Average", avgCaloriesBurned))
+                    RuleMark(y: .value("Average", averageCalories))
                         .foregroundStyle(.cyan)
                         .lineStyle(.init(lineWidth: 1, dash: [5]))
                     
@@ -111,31 +85,9 @@ struct CalorieLineChart: View {
                 }
             }
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground)))
-    }
-    
-    var annotationView: some View {
-        VStack(alignment: .leading) {
-            Text(selectedHealthMetricDate?.date ?? .now, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
-                .font(.footnote.bold())
-                .foregroundStyle(.secondary)
-            
-            Text(selectedHealthMetricDate?.value ?? 0, format: .number.precision(.fractionLength(1)))
-                .fontWeight(.heavy)
-                .foregroundStyle(.orange)
-        }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(.secondarySystemBackground))
-                .shadow(color: .secondary.opacity(0.4), radius: 4)
-        )
     }
 }
 
 #Preview {
-    CalorieLineChart(selectedHealthMetric: .calories, chartData: FakeData.calories)
+    CalorieLineChart(chartData: ChartHelper.convert(data: FakeData.calories))
 }

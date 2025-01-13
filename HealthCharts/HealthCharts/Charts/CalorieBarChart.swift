@@ -12,14 +12,10 @@ struct CalorieBarChart: View {
     
     @State private var rawSelectedDate: Date?
     
-    var selectedHealthMetric: HealthMetricContext
     var chartData: [WeekdayChartData]
     
-    var selectedHealthMetricDate: WeekdayChartData? {
-        guard let rawSelectedDate else { return nil }
-        return chartData.first {
-            Calendar.current.isDate(rawSelectedDate, inSameDayAs: $0.date)
-        }
+    var selectedData: WeekdayChartData? {
+        ChartHelper.parseSelectedData(from: chartData, in: rawSelectedDate)
     }
     
     var minValue: Double {
@@ -27,21 +23,11 @@ struct CalorieBarChart: View {
     }
     
     var body: some View {
-        VStack {
-            HStack {
-                VStack(alignment: .leading) {
-                    Label("Averages", systemImage: "figure")
-                        .font(.title3.bold())
-                        .foregroundStyle(.orange)
-                    
-                    Text("Per Weekday (Last 28 Days)")
-                        .font(.caption)
-                }
-                
-                Spacer()
-            }
-            .foregroundStyle(.secondary)
-            .padding(.bottom, 12)
+        ChartContainer(title: "Averages",
+                       symbol: "figure",
+                       subtitle: "Per Weekday (Last 28 Days)",
+                       context: .calories,
+                       isNav: false) {
             
             if chartData.isEmpty {
                 ContentUnavailableView(
@@ -51,13 +37,8 @@ struct CalorieBarChart: View {
                 )
             } else {
                 Chart {
-                    if let selectedHealthMetricDate {
-                        RuleMark(x: .value("Selected Metric", selectedHealthMetricDate.date, unit: .day))
-                            .foregroundStyle(Color.secondary.opacity(0.3))
-                            .offset(y: -10)
-                            .annotation(position: .top,
-                                        spacing: 0,
-                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) { annotationView }
+                    if let selectedData {
+                        ChartAnnotationView(data: selectedData, context: .calories)
                     }
                     
                     ForEach(chartData) { calorie in
@@ -66,7 +47,7 @@ struct CalorieBarChart: View {
                             y: .value("Steps", calorie.value)
                         )
                         .foregroundStyle(Color.orange.gradient)
-                        .opacity(rawSelectedDate == nil || calorie.date == selectedHealthMetricDate?.date ? 1 : 0.3)
+                        .opacity(rawSelectedDate == nil || calorie.date == selectedData?.date ? 1 : 0.3)
                     }
                 }
                 .frame(height: 220)
@@ -87,33 +68,9 @@ struct CalorieBarChart: View {
                 }
             }
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground))
-        )
-    }
-    
-    var annotationView: some View {
-        VStack(alignment: .leading) {
-            Text(selectedHealthMetricDate?.date ?? .now, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
-                .font(.footnote.bold())
-                .foregroundStyle(.secondary)
-            
-            Text(selectedHealthMetricDate?.value ?? 0, format: .number.precision(.fractionLength(1)))
-                .fontWeight(.heavy)
-                .foregroundStyle(.orange)
-        }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(.secondarySystemBackground))
-                .shadow(color: .secondary.opacity(0.4), radius: 4)
-        )
     }
 }
 
 #Preview {
-    CalorieBarChart(selectedHealthMetric: .calories,
-                    chartData: ChartMath.averageWeekdayCount(for: FakeData.calories))
+    CalorieBarChart(chartData: ChartMath.averageWeekdayCount(for: FakeData.calories))
 }

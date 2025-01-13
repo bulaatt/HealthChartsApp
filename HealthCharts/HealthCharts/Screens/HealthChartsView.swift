@@ -43,11 +43,11 @@ struct HealthChartsView: View {
                     
                     switch selectedHealthMetric {
                     case .steps:
-                        StepBarChart(selectedHealthMetric: selectedHealthMetric, chartData: healthKitManager.stepData)
+                        StepBarChart(chartData: ChartHelper.convert(data: healthKitManager.stepData))
                         StepPieChart(chartData: ChartMath.averageWeekdayCount(for: healthKitManager.stepData))
                     case .calories:
-                        CalorieLineChart(selectedHealthMetric: selectedHealthMetric, chartData: healthKitManager.calorieData)
-                        CalorieBarChart(selectedHealthMetric: selectedHealthMetric, chartData: ChartMath.averageWeekdayCount(for: healthKitManager.calorieData))
+                        CalorieLineChart(chartData: ChartHelper.convert(data: healthKitManager.calorieData))
+                        CalorieBarChart(chartData: ChartMath.averageWeekdayCount(for: healthKitManager.calorieData))
                     }
                 }
             }
@@ -60,7 +60,7 @@ struct HealthChartsView: View {
             .navigationDestination(for: HealthMetricContext.self) { healthMetric in
                 HealthDataListView(healthMetric: healthMetric)
             }
-            .sheet(isPresented: $isShowingPermissionPrimingSheet, onDismiss: {
+            .fullScreenCover(isPresented: $isShowingPermissionPrimingSheet, onDismiss: {
                 Task {
                     await fetchHealthData()
                 }

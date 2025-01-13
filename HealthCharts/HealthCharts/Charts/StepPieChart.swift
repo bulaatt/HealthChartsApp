@@ -26,17 +26,11 @@ struct StepPieChart: View {
     var chartData: [WeekdayChartData]
     
     var body: some View {
-        VStack(alignment: .leading) {
-            VStack(alignment: .leading) {
-                Label("Averages", systemImage: "calendar")
-                    .font(.title3.bold())
-                    .foregroundStyle(.mint)
-                Text("Last 28 Days")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.bottom, 12)
-            
+        ChartContainer(title: "Averages",
+                       symbol: "calendar",
+                       subtitle: "Last 28 Days",
+                       context: .steps,
+                       isNav: false) {
             if chartData.isEmpty {
                 ContentUnavailableView(
                     "No Data",
@@ -74,7 +68,7 @@ struct StepPieChart: View {
                                 VStack {
                                     Text(selectedWeekday.date.weekdayTitle)
                                         .font(.title3.bold())
-                                        .contentTransition(.identity)
+                                        .animation(.none)
                                     
                                     Text(selectedWeekday.value, format: .number.precision(.fractionLength(0)))
                                         .foregroundStyle(.secondary)
@@ -87,10 +81,6 @@ struct StepPieChart: View {
                 }
             }
         }
-        .padding()
-        .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.secondarySystemBackground)))
     }
 }
 
