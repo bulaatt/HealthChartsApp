@@ -17,6 +17,13 @@ struct ChartContainer<Content: View>: View {
     
     @ViewBuilder var content: () -> Content
     
+    private var titleColor: Color {
+        switch context {
+        case .steps: .mint
+        case .calories: .orange
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading) {
             if isNav {
@@ -51,7 +58,7 @@ struct ChartContainer<Content: View>: View {
         VStack(alignment: .leading) {
             Label(title, systemImage: symbol)
                 .font(.title3.bold())
-                .foregroundStyle(context == .steps ? .mint : .orange)
+                .foregroundStyle(titleColor)
             
             Text(subtitle)
                 .font(.caption)

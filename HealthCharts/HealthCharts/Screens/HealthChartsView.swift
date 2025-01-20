@@ -23,80 +23,31 @@ enum HealthMetricContext: CaseIterable, Identifiable {
 }
 
 struct HealthChartsView: View {
-    
     @Environment(HealthKitManager.self) private var healthKitManager
-    @State private var isShowingPermissionPrimingSheet: Bool = false
-    @State private var selectedHealthMetric: HealthMetricContext = .steps
-    @State private var isShowingAlert: Bool = false
-    @State private var fetchError: HCError = .noData
-    var isSteps: Bool { selectedHealthMetric == .steps }
-    
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    Picker("Health Metric", selection: $selectedHealthMetric) {
-                        ForEach(HealthMetricContext.allCases) { healthMetric in
-                            Text(healthMetric.title)
-                        }
-                    }.pickerStyle(SegmentedPickerStyle())
-                    
-                    switch selectedHealthMetric {
-                    case .steps:
-                        StepBarChart(chartData: ChartHelper.convert(data: healthKitManager.stepData))
-                        StepPieChart(chartData: ChartMath.averageWeekdayCount(for: healthKitManager.stepData))
-                    case .calories:
-                        CalorieLineChart(chartData: ChartHelper.convert(data: healthKitManager.calorieData))
-                        CalorieBarChart(chartData: ChartMath.averageWeekdayCount(for: healthKitManager.calorieData))
-                    }
-                }
-            }
-            .padding()
-            .scrollIndicators(.hidden)
-            .task {
-                await fetchHealthData()
-            }
-            .navigationTitle("Health Charts")
-            .navigationDestination(for: HealthMetricContext.self) { healthMetric in
-                HealthDataListView(healthMetric: healthMetric)
-            }
-            .fullScreenCover(isPresented: $isShowingPermissionPrimingSheet, onDismiss: {
-                Task {
-                    await fetchHealthData()
-                }
-            }, content: {
-                HealthKitPermissionPrimingView()
-            })
-            .alert(isPresented: $isShowingAlert, error: fetchError) { fetchError in
-                switch fetchError {
-                case .authNotDetermined, .noData, .unableToCompleteRequest, .invalidValue:
-                    EmptyView()
-                case .sharingDenied(_):
-                    Button("Settings") {
-                        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
-                    }
-                    Button("Cancel", role: .cancel) { }
-                }
-            } message: { fetchError in
-                Text(fetchError.failureReason)
-            }
+    @State private var selectedTab = "Steps"
+    private var tabColor: Color {
+        switch selectedTab {
+        case "Steps": .mint
+        case "Calories": .orange
+        default: .gray
         }
-        .tint(isSteps ? .mint : .orange)
     }
     
-    private func fetchHealthData() async {
-        do {
-            try await healthKitManager.fetchStepCount()
-            try await healthKitManager.fetchCalories()
-        } catch HCError.authNotDetermined {
-            isShowingPermissionPrimingSheet = true
-        } catch HCError.noData {
-            fetchError = .noData
-            isShowingAlert = true
-        } catch {
-            fetchError = .unableToCompleteRequest
-            isShowingAlert = true
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            StepChartsView()
+                .tabItem {
+                    Label("Steps", systemImage: "figure.walk")
+                }
+                .tag("Steps")
+            
+            CalorieChartsView()
+                .tabItem {
+                    Label("Calories", systemImage: "flame")
+                }
+                .tag("Calories")
         }
+        .tint(tabColor)
     }
 }
 
