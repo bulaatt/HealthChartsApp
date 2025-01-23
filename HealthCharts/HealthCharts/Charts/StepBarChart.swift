@@ -37,7 +37,7 @@ struct StepBarChart: View {
             } else {
                 Chart {
                     if let selectedData {
-                        ChartAnnotationView(data: selectedData, context: .steps)
+                        ChartAnnotationView(data: selectedData, context: .steps, showDate: true)
                     }
                     
                     RuleMark(y: .value("Average", averageSteps))
@@ -49,7 +49,7 @@ struct StepBarChart: View {
                             x: .value("Date", steps.date, unit: .day),
                             y: .value("Steps", steps.value)
                         )
-                        .foregroundStyle(Color.mint.gradient)
+                        .foregroundStyle(Color.stepCharts.gradient)
                         .opacity(rawSelectedDate == nil || steps.date == selectedData?.date ? 1 : 0.3)
                     }
                 }

@@ -12,6 +12,21 @@ struct ChartAnnotationView: ChartContent {
     
     let data: WeekdayChartData
     let context: HealthMetricContext
+    let showDate: Bool
+    
+    private var contextColor: Color {
+        switch context {
+        case .steps: .stepCharts
+        case .calories: .calorieCharts
+        }
+    }
+    
+    private var contextPrecision: Int {
+        switch context {
+        case .steps: 0
+        case .calories: 1
+        }
+    }
     
     var body: some ChartContent {
         RuleMark(x: .value("Selected Metric", data.date, unit: .day))
@@ -24,13 +39,19 @@ struct ChartAnnotationView: ChartContent {
     
     var annotationView: some View {
         VStack(alignment: .leading) {
-            Text(data.date, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
-                .font(.footnote.bold())
-                .foregroundStyle(.secondary)
+            if showDate {
+                Text(data.date, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
+                    .font(.footnote.bold())
+                    .foregroundStyle(.secondary)
+            } else {
+                Text(data.date, format: .dateTime.weekday(.wide))
+                    .font(.footnote.bold())
+                    .foregroundStyle(.secondary)
+            }
             
-            Text(data.value, format: .number.precision(.fractionLength(context == .steps ? 0 : 1)))
+            Text(data.value, format: .number.precision(.fractionLength(contextPrecision)))
                 .fontWeight(.heavy)
-                .foregroundStyle(context == .steps ? .mint : .orange)
+                .foregroundStyle(contextColor)
         }
         .padding(12)
         .background(

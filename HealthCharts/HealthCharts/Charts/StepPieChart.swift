@@ -46,7 +46,7 @@ struct StepPieChart: View {
                                    innerRadius: .ratio(0.618),
                                    outerRadius: isWeekdaySelected ? 140 : 110,
                                    angularInset: 1.6)
-                        .foregroundStyle(.mint.gradient)
+                        .foregroundStyle(.stepCharts.gradient)
                         .cornerRadius(8)
                         .opacity(isWeekdaySelected ? 1.0 : 0.3)
                     }

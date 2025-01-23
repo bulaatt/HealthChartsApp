@@ -25,10 +25,11 @@ enum HealthMetricContext: CaseIterable, Identifiable {
 struct HealthChartsView: View {
     @Environment(HealthKitManager.self) private var healthKitManager
     @State private var selectedTab = "Steps"
+    
     private var tabColor: Color {
         switch selectedTab {
-        case "Steps": .mint
-        case "Calories": .orange
+        case "Steps": .stepCharts
+        case "Calories": .calorieCharts
         default: .gray
         }
     }
@@ -37,7 +38,7 @@ struct HealthChartsView: View {
         TabView(selection: $selectedTab) {
             StepChartsView()
                 .tabItem {
-                    Label("Steps", systemImage: "figure.walk")
+                    Label("Steps", systemImage: "figure.hiking")
                 }
                 .tag("Steps")
             

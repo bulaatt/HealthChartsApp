@@ -42,11 +42,11 @@ struct CalorieLineChart: View {
             } else {
                 Chart {
                     if let selectedData {
-                        ChartAnnotationView(data: selectedData, context: .calories)
+                        ChartAnnotationView(data: selectedData, context: .calories, showDate: true)
                     }
                     
                     RuleMark(y: .value("Average", averageCalories))
-                        .foregroundStyle(.cyan)
+                        .foregroundStyle(.gray)
                         .lineStyle(.init(lineWidth: 1, dash: [5]))
                     
                     ForEach(chartData) { calorie in
@@ -55,14 +55,14 @@ struct CalorieLineChart: View {
                             yStart: .value("Value", calorie.value),
                             yEnd: .value("Min Value", minValue)
                         )
-                        .foregroundStyle(Gradient(colors: [.orange.opacity(0.5), .clear]))
+                        .foregroundStyle(Gradient(colors: [.calorieCharts.opacity(0.5), .clear]))
                         .interpolationMethod(.catmullRom)
                         
                         LineMark(
                             x: .value("Day", calorie.date, unit: .day),
                             y: .value("Value", calorie.value)
                         )
-                        .foregroundStyle(.orange.gradient)
+                        .foregroundStyle(.calorieCharts.gradient)
                         .interpolationMethod(.catmullRom)
                         .symbol(.circle)
                     }

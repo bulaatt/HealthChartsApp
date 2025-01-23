@@ -38,7 +38,7 @@ struct CalorieBarChart: View {
             } else {
                 Chart {
                     if let selectedData {
-                        ChartAnnotationView(data: selectedData, context: .calories)
+                        ChartAnnotationView(data: selectedData, context: .calories, showDate: false)
                     }
                     
                     ForEach(chartData) { calorie in
@@ -46,7 +46,7 @@ struct CalorieBarChart: View {
                             x: .value("Date", calorie.date, unit: .day),
                             y: .value("Steps", calorie.value)
                         )
-                        .foregroundStyle(Color.orange.gradient)
+                        .foregroundStyle(Color.calorieCharts.gradient)
                         .opacity(rawSelectedDate == nil || calorie.date == selectedData?.date ? 1 : 0.3)
                     }
                 }

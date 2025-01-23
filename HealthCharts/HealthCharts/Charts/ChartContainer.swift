@@ -19,8 +19,8 @@ struct ChartContainer<Content: View>: View {
     
     private var titleColor: Color {
         switch context {
-        case .steps: .mint
-        case .calories: .orange
+        case .steps: .stepCharts
+        case .calories: .calorieCharts
         }
     }
     
