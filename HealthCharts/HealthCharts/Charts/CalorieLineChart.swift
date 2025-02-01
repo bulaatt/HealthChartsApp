@@ -11,6 +11,7 @@ import Charts
 struct CalorieLineChart: View {
     
     @State private var rawSelectedDate: Date?
+    @State private var selectedDay: Date?
     
     var chartData: [WeekdayChartData]
     
@@ -32,7 +33,6 @@ struct CalorieLineChart: View {
                        subtitle: "Avg: \(averageCalories.formatted(.number.precision(.fractionLength(1)))) kcal",
                        context: .calories,
                        isNav: true) {
-            
             if chartData.isEmpty {
                 ContentUnavailableView(
                     "No Data",
@@ -85,6 +85,12 @@ struct CalorieLineChart: View {
                 }
             }
         }
+                       .sensoryFeedback(.selection, trigger: selectedDay)
+                       .onChange(of: rawSelectedDate) { oldValue, newValue in
+                           if oldValue?.weekdayInt != newValue?.weekdayInt {
+                               selectedDay = newValue
+                           }
+                       }
     }
 }
 

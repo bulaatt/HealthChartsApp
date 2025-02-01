@@ -11,6 +11,7 @@ import Charts
 struct CalorieBarChart: View {
     
     @State private var rawSelectedDate: Date?
+    @State private var selectedDay: Date?
     
     var chartData: [WeekdayChartData]
     
@@ -28,7 +29,6 @@ struct CalorieBarChart: View {
                        subtitle: "Per Weekday (Last 28 Days)",
                        context: .calories,
                        isNav: false) {
-            
             if chartData.isEmpty {
                 ContentUnavailableView(
                     "No Data",
@@ -68,6 +68,12 @@ struct CalorieBarChart: View {
                 }
             }
         }
+                       .sensoryFeedback(.selection, trigger: selectedDay)
+                       .onChange(of: rawSelectedDate) { oldValue, newValue in
+                           if oldValue?.weekdayInt != newValue?.weekdayInt {
+                               selectedDay = newValue
+                           }
+                       }
     }
 }
 
